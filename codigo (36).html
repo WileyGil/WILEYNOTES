@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aplicação para criar e gerenciar anotações rápidas de forma eficiente">
+    <title>Notas Rápidas - Organize Suas Ideias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover-color: #3a56d4;
+            --text-color: #2b2d42;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --border-color: #e0e0e0;
+            --placeholder-color: #adb5bd;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --highlight-color: #fff3bf;
+            --focus-color: #f8f4ff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Efeito de gradiente sutil no fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30vh;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.08) 0%, rgba(0,0,0,0) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito sutil de destaque no container */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--success-color) 100%);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* Efeito de sublinhado animado */
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        h1:hover::after {
+            width: 120px;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-top: -1.25rem;
+            margin-bottom: 2rem;
+            color: var(--placeholder-color);
+            font-size: 1rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Efeito de foco no formulário */
+        .form-group:focus-within {
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            transition: color 0.2s ease;
+        }
+
+        /* Efeito de flutuação nos labels */
+        .form-group:focus-within label {
+            color: var(--primary-color);
+        }
+
+        textarea, input[type="text"], input[type="search"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            color: var(--text-color);
+            background-color: #fff;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        /* Efeito de foco mais pronunciado */
+        textarea:focus, input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+            background-color: var(--focus-color);
+            transform: translateY(-1px);
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: var(--placeholder-color);
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        textarea:focus::placeholder, input:focus::placeholder {
+            opacity: 0.5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de onda ao clicar */
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 1s ease;
+            pointer-events: none;
+        }
+
+        .btn:active::after {
+            transform: scale(4);
+            opacity: 1;
+            transition: transform 0s, opacity 0s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            margin: 0 auto;
+            display: block;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Efeito de pulsação para chamar atenção */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2); }
+            50% { transform: scale(1.03); box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2); }
+        }
+
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #e5176b;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3ab4d8;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e68a19;
+        }
+
+        .btn-navigation {
+            background-color: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            padding: 0;
+            position: fixed;
+            bottom: 20px;
+            z-index: 100;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .btn-navigation:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-prev {
+            left: 20px;
+        }
+
+        .btn-next {
+            right: 20px;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin: 2.5rem 0 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: var(--primary-color);
+            margin: 0.75rem auto 0;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .section-title:hover::after {
+            width: 120px;
+        }
+
+        .search-info {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--placeholder-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-info.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .search-term {
+            font-weight: bold;
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .search-term::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .search-term:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .notes-list {
+            margin-top: 1.5rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .note-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .note-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .note-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Efeito de borda sutil ao passar o mouse */
+        .note-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .note-item:hover::before {
+            opacity: 1;
+        }
+
+        .note-content {
+            flex: 1;
+            margin-right: 1rem;
+            color: var(--text-color);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .highlight:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--placeholder-color);
+            background-color: rgba(233, 236, 239, 0.5);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .empty-state:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--placeholder-color);
+            opacity: 0.7;
+            transition: transform 0.3s ease;
+        }
+
+        .empty-state:hover i {
+            transform: scale(1.1);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message i {
+            font-size: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .message:hover i {
+            transform: rotate(15deg);
+        }
+
+        .message.success {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: #0c8599;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .message.error {
+            background-color: rgba(247, 37, 133, 0.15);
+            color: #c2255c;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .note-date {
+            font-size: 0.75rem;
+            color: var(--placeholder-color);
+            margin-top: 0.5rem;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .note-item:hover .note-date {
+            color: var(--primary-color);
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-color: #f8f9fa;
+                --background-color: #212529;
+                --card-background: #2b2d42;
+                --border-color: #495057;
+                --placeholder-color: #adb5bd;
+                --highlight-color: #5c4800;
+                --focus-color: #2a2342;
+            }
+
+            body::before {
+                background: linear-gradient(135deg, rgba(67, 97, 238, 0.15) 0%, rgba(0,0,0,0) 100%);
+            }
+
+            textarea, input[type="text"], input[type="search"] {
+                background-color: #343a40;
+                color: var(--text-color);
+                border-color: var(--border-color);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .note-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .note-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .container {
+                padding: 1.25rem;
+            }
+
+            .btn-primary {
+                width: 100%;
+            }
+
+            .note-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulseHighlight {
+            0% { background-color: var(--highlight-color); }
+            50% { background-color: #ffea94; }
+            100% { background-color: var(--highlight-color); }
+        }
+
+        .current-highlight {
+            animation: pulseHighlight 1.5s infinite;
+        }
+
+        /* Acessibilidade */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        [aria-busy="true"] {
+            cursor: progress;
+        }
+
+        [aria-disabled="true"] {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Efeito de confete para feedback positivo */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            opacity: 0;
+            z-index: 999;
+            animation: confetti 3s ease-out;
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notas Rápidas</h1>
+        <p class="subtitle">Organize suas ideias e lembretes com facilidade!</p>
+
+        <form id="noteForm" class="form-group">
+            <label for="noteContent">Escreva sua anotação:</label>
+            <textarea 
+                id="noteContent" 
+                rows="5" 
+                placeholder="Ex: Ligar para o cliente João às 14h sobre o projeto X."
+                required
+            ></textarea>
+            <button type="submit" class="btn btn-primary btn-pulse">
+                <i class="fas fa-save"></i> Salvar Anotação
+            </button>
+        </form>
+
+        <h2 class="section-title">Buscar Anotações</h2>
+
+        <div class="form-group">
+            <label for="searchInput">Digite para pesquisar:</label>
+            <input 
+                type="search" 
+                id="searchInput" 
+                placeholder="Digite palavras-chave para buscar..."
+                aria-label="Buscar anotações"
+            >
+        </div>
+
+        <div id="searchInfo" class="search-info">
+            Mostrando resultados para: <span class="search-term" id="currentSearchTerm"></span>
+            <span id="matchCounter"></span>
+        </div>
+
+        <div id="notesList" class="notes-list hidden">
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>Digite palavras-chave para buscar suas anotações</p>
+            </div>
+        </div>
+
+        <div id="messageArea"></div>
+    </div>
+
+    <button id="prevBtn" class="btn btn-navigation btn-prev hidden" aria-label="Resultado anterior">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    <button id="nextBtn" class="btn btn-navigation btn-next hidden" aria-label="Próximo resultado">
+        <i class="fas fa-chevron-down"></i>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+
+        // Variáveis globais para controle da navegação
+        let currentSearchTerm = '';
+        let currentMatchIndex = 0;
+        let matches = [];
+
+        function initializeApp() {
+            // Elementos DOM
+            const noteForm = document.getElementById('noteForm');
+            const noteContent = document.getElementById('noteContent');
+            const searchInput = document.getElementById('searchInput');
+            const notesList = document.getElementById('notesList');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const searchInfo = document.getElementById('searchInfo');
+            
+            // Adiciona classe de animação após pequeno delay
+            setTimeout(() => {
+                document.querySelector('.container').style.transform = 'translateY(0)';
+                document.querySelector('h1').style.opacity = '1';
+            }, 100);
+            
+            // Event listeners
+            noteForm.addEventListener('submit', handleFormSubmit);
+            searchInput.addEventListener('input', debounce(handleSearch, 300));
+            prevBtn.addEventListener('click', () => navigateMatches(-1));
+            nextBtn.addEventListener('click', () => navigateMatches(1));
+            
+            // Configuração inicial
+            searchInput.focus();
+            
+            // Adiciona efeito de onda nos botões
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    const wave = document.createElement('span');
+                    wave.className = 'wave';
+                    wave.style.left = `${x}px`;
+                    wave.style.top = `${y}px`;
+                    this.appendChild(wave);
+                    setTimeout(() => wave.remove(), 500);
+                });
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const noteContent = document.getElementById('noteContent');
+            const content = noteContent.value.trim();
+            
+            if (!content) {
+                showMessage('Por favor, digite algo antes de salvar!', 'error');
+                noteContent.focus();
+                return;
+            }
+            
+            saveNote(content);
+            noteContent.value = '';
+            showMessage('Anotação salva com sucesso!', 'success');
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const colors = ['#4361ee', '#4cc9f0', '#f72585', '#f8961e', '#7209b7'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            const notesList = document.getElementById('notesList');
+            const searchInfo = document.getElementById('searchInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (searchTerm === '') {
+                notesList.classList.add('hidden');
+                searchInfo.classList.remove('visible');
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                return;
+            }
+            
+            currentSearchTerm = searchTerm;
+            document.getElementById('currentSearchTerm').textContent = searchTerm;
+            
+            notesList.classList.remove('hidden');
+            searchInfo.classList.add('visible');
+            
+            loadNotes(searchTerm);
+        }
+
+        function saveNote(content) {
+            try {
+                const notes = getNotesFromStorage();
+                const newNote = {
+                    id: Date.now(),
+                    content: content,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                notes.unshift(newNote);
+                localStorage.setItem('notes', JSON.stringify(notes));
+            } catch (error) {
+                console.error('Erro ao salvar nota:', error);
+                showMessage('Ocorreu um erro ao salvar a nota.', 'error');
+            }
+        }
+
+        function loadNotes(searchTerm = '') {
+            try {
+                const notes = getNotesFromStorage();
+                const filteredNotes = searchTerm 
+                    ? notes.filter(note => 
+                        note.content.toLowerCase().includes(searchTerm.toLowerCase()))
+                    : notes;
+                
+                renderNotes(filteredNotes, searchTerm);
+            } catch (error) {
+                console.error('Erro ao carregar notas:', error);
+                showMessage('Ocorreu um erro ao carregar as notas.', 'error');
+            }
+        }
+
+        function getNotesFromStorage() {
+            return JSON.parse(localStorage.getItem('notes')) || [];
+        }
+
+        function renderNotes(notes, searchTerm = '') {
+            const notesList = document.getElementById('notesList');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Resetar navegação
+            matches = [];
+            currentMatchIndex = 0;
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Nenhuma nota encontrada para "${searchTerm}"</p>
+                    </div>
+                `;
+                document.getElementById('matchCounter').textContent = '';
+                
+                // Animação para o estado vazio
+                setTimeout(() => {
+                    const emptyState = notesList.querySelector('.empty-state');
+                    if (emptyState) {
+                        emptyState.classList.add('visible');
+                    }
+                }, 10);
+                
+                return;
+            }
+            
+            notesList.innerHTML = notes.map(note => {
+                let content = escapeHtml(note.content);
+                
+                // Destacar os termos de busca
+                if (searchTerm) {
+                    const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+                    content = content.replace(regex, '<span class="highlight">$1</span>');
+                    
+                    // Contar ocorrências
+                    const matchCount = (note.content.match(new RegExp(escapeRegExp(searchTerm), 'gi')) || []).length;
+                    
+                    return `
+                        <div class="note-item" data-id="${note.id}" data-matches="${matchCount}">
+                            <div class="note-content">${content}
+                                <span class="note-date" title="${formatDate(note.createdAt)}">
+                                    ${formatDate(note.createdAt, true)}
+                                </span>
+                            </div>
+                            <div class="note-actions">
+                                <button class="btn btn-success btn-sm" onclick="editNote(${note.id})" aria-label="Editar nota">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteNote(${note.id})" aria-label="Excluir nota">
+                                    <i class="fas fa-trash-alt"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="note-item" data-id="${note.id}">
+                        <div class="note-content">${content}
+                            <span class="note-date" title="${formatDate(note.createdAt)}">
+                                ${formatDate(note.createdAt, true)}
+                            </span>
+                        </div>
+                        <div class="note-actions">
+                            <button class="btn btn-success btn-sm" onclick="editNote(${note.id})" aria-label="Editar nota">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteNote(${note.id})" aria-label="Excluir nota">
+                                <i class="fas fa-trash-alt"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Animar itens da nota um por um
+            const noteItems = notesList.querySelectorAll('.note-item');
+            noteItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, index * 100);
+            });
+            
+            if (searchTerm) {
+                // Coletar todas as ocorrências destacadas
+                const highlights = notesList.querySelectorAll('.highlight');
+                matches = Array.from(highlights);
+                
+                // Atualizar contador
+                updateMatchCounter();
+                
+                // Mostrar botões de navegação se houver resultados
+                if (matches.length > 0) {
+                    prevBtn.classList.remove('hidden');
+                    nextBtn.classList.remove('hidden');
+                    highlightCurrentMatch();
+                }
+            }
+        }
+
+        function navigateMatches(direction) {
+            if (matches.length === 0) return;
+            
+            // Remover destaque atual
+            matches[currentMatchIndex].classList.remove('current-highlight');
+            
+            // Navegar para próximo/anterior
+            currentMatchIndex += direction;
+            
+            // Circular entre os resultados
+            if (currentMatchIndex < 0) {
+                currentMatchIndex = matches.length - 1;
+            } else if (currentMatchIndex >= matches.length) {
+                currentMatchIndex = 0;
+            }
+            
+            // Destacar novo item
+            highlightCurrentMatch();
+            
+            // Rolar para o elemento
+            matches[currentMatchIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        function highlightCurrentMatch() {
+            matches[currentMatchIndex].classList.add('current-highlight');
+            updateMatchCounter();
+        }
+
+        function updateMatchCounter() {
+            const totalMatches = matches.length;
+            if (totalMatches > 0) {
+                document.getElementById('matchCounter').textContent = 
+                    ` (${currentMatchIndex + 1}/${totalMatches} ocorrências)`;
+            } else {
+                document.getElementById('matchCounter').textContent = '';
+            }
+        }
+
+        function editNote(id) {
+            const notes = getNotesFromStorage();
+            const note = notes.find(n => n.id === id);
+            
+            if (!note) {
+                showMessage('Nota não encontrada para edição.', 'error');
+                return;
+            }
+            
+            const newContent = prompt('Edite sua nota:', note.content);
+            
+            if (newContent === null) return;
+            
+            if (!newContent.trim()) {
+                showMessage('A nota não pode ficar vazia!', 'error');
+                return;
+            }
+            
+            note.content = newContent.trim();
+            note.updatedAt = new Date().toISOString();
+            
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes(document.getElementById('searchInput').value);
+            showMessage('Nota atualizada com sucesso!', 'success');
+        }
+
+        function deleteNote(id) {
+            if (!confirm('Tem certeza que deseja excluir esta nota?')) return;
+            
+            try {
+                const notes = getNotesFromStorage();
+                const updatedNotes = notes.filter(note => note.id !== id);
+                
+                localStorage.setItem('notes', JSON.stringify(updatedNotes));
+                loadNotes(document.getElementById('searchInput').value);
+                showMessage('Nota excluída com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao excluir nota:', error);
+                showMessage('Ocorreu um erro ao excluir a nota.', 'error');
+            }
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            messageArea.innerHTML = `
+                <div class="message ${type}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Adiciona classe de animação
+            setTimeout(() => {
+                const msgElement = messageArea.querySelector('.message');
+                if (msgElement) {
+                    msgElement.classList.add('visible');
+                }
+            }, 10);
+            
+            setTimeout(() => {
+                const msgElement = messageArea.querySelector('.message');
+                if (msgElement) {
+                    msgElement.classList.remove('visible');
+                    setTimeout(() => {
+                        messageArea.innerHTML = '';
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Utilitários
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function formatDate(isoString, short = false) {
+            const date = new Date(isoString);
+            if (short) {
+                return date.toLocaleDateString('pt-BR');
+            }
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Expor funções para o escopo global
+        window.editNote = editNote;
+        window.deleteNote = deleteNote;
+    </script>
+</body>
+</html>
